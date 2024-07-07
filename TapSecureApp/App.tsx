@@ -1,6 +1,5 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
-import { Alert, StyleSheet, Text, TouchableNativeFeedback, View } from 'react-native';
 import { RootStackParamList } from './types/RootStackParamList';
 import { NavigationContainer } from '@react-navigation/native';
 import LoginScreen from './screens/LoginScreen';
