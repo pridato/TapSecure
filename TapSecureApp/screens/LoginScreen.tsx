@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { IconFaceId } from '@tabler/icons-react-native';
+import * as LocalAuthentication from 'expo-local-authentication';
 
 const LoginScreen = ({ navigation }: any) => {
   const [email, setEmail] = useState('');
@@ -17,6 +18,40 @@ const LoginScreen = ({ navigation }: any) => {
     }
   };
 
+  /**
+   * Función que se ejecuta al presionar el botón de faceId para manejar el inicio de sesion utilizando biometricas
+   */
+  const handleFaceIdLogin = async () => {
+    // Verificar si el dispositivo tiene hardware para autenticación, ya sea FaceId o TouchId
+    const hasHardware = await LocalAuthentication.hasHardwareAsync();
+    if (!hasHardware) {
+      alert('No se puede usar FaceId');
+      return;
+    }
+
+    // en caso de que el dispositivo tenga hardware para autenticación, verificar si soporta FaceId
+    const supportedAuthTypes = await LocalAuthentication.supportedAuthenticationTypesAsync();
+    if (supportedAuthTypes.length === 0) {
+      alert('No se puede usar FaceId');
+      return;
+    }
+
+    // verificar si el dispositivo tiene guardada la biometría
+    const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+    if (!isEnrolled) {
+      alert('No se puede usar FaceId');
+      return;
+    }
+
+    // autenticar con FaceId
+    const result = await LocalAuthentication.authenticateAsync()
+    if (result.success) {
+      navigation.replace('Home');
+    } else {
+      alert('Autenticación fallida');
+    }
+  }
+
   return (
     <View style={styles.container}>
       {/* texto olvidar contraseña */}
@@ -25,6 +60,7 @@ const LoginScreen = ({ navigation }: any) => {
           <Text style={styles.forgotPasswordText}>¿Has olvidado la contraseña?</Text>
         </TouchableOpacity>
       </View>
+      
       {/* icono de usuario */}
       <Image source={require('../assets/contrasena.gif')} style={styles.icon} />
 
@@ -47,7 +83,7 @@ const LoginScreen = ({ navigation }: any) => {
 
       {/* Boton de faceId */}
       <View style={styles.faceContainer}>
-        <TouchableOpacity style={{alignContent: 'center', flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}} onPress={() => alert('FaceId')}>
+        <TouchableOpacity onPress={handleFaceIdLogin} style={{alignContent: 'center', flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}} >
           <IconFaceId size={40} stroke="#c4c4c4" />
           <Text style={styles.useFaceId}>Accede mostrando tu cara</Text>
         </TouchableOpacity>
